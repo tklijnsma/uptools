@@ -60,6 +60,14 @@ def numentries(arrays):
         return len(v)
 
 
+def numentries_rootfile(rootfile, treepath=None):
+    if treepath is None:
+        treepath, tree = find_tree(rootfile)
+    else:
+        tree = uproot.open(rootfile, treepath)
+    return tree.numentries
+
+
 def format_rootfiles(rootfiles):
     try:
         if rootfiles.endswith(".root"):
