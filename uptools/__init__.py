@@ -64,7 +64,7 @@ def numentries_rootfile(rootfile, treepath=None):
     if treepath is None:
         treepath, tree = find_tree(rootfile)
     else:
-        tree = uproot.open(rootfile, treepath)
+        tree = uproot.open(rootfile)[treepath]
     return tree.numentries
 
 
@@ -102,6 +102,26 @@ def iter_arrays(rootfiles, nmax=None, treepath=None, **kwargs):
                 yield arrays
                 if ntodo <= 0:
                     return
+
+
+def iter_arrays_weighted(N, crosssections, rootfiles, **kwargs):
+    """
+    N: Total number of events to be iterated over
+    crosssections: :ist of cross sections
+    rootfiles: List of (list of) rootfiles, first dim equal to crosssections
+    """
+    if len(crosssections) != len(rootfiles):
+        raise Exception(
+            "Length of cross sections should be equal to number of passed rootfiles"
+        )
+    norm = sum(crosssections)
+    ns_float = [xs / norm * N for xs in crosssections]
+    ns = [round(n) for n in ns_float]
+    logger.info("Requested %s, doing %s: %s", N, sum(ns), ns)
+    for n, this_rootfiles in zip(ns, rootfiles):
+        if n == 0:
+            continue
+        yield from iter_arrays(this_rootfiles, nmax=n, **kwargs)
 
 
 def iter_events(rootfiles, **kwargs):
