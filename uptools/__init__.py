@@ -23,7 +23,7 @@ logger = setup_logger()
 
 
 def debug(flag=True):
-    logger.setLevel(logging.DEBUG if flag else logging.INO)
+    logger.setLevel(logging.DEBUG if flag else logging.INFO)
 
 
 def _iter_trees(tdir, prefix=""):
@@ -128,6 +128,15 @@ def iter_events(rootfiles, **kwargs):
     for arrays in iter_arrays(rootfiles, **kwargs):
         for i in range(numentries(arrays)):
             yield get_event(arrays, i)
+
+
+def get_event_rootfile(rootfile, i_event, **kwargs):
+    """
+    Calls the iter_events iterator until the desired event is reached
+    """
+    for i, event in enumerate(iter_events(rootfile, **kwargs)):
+        if i == i_event:
+            return event
 
 
 class Bunch:
@@ -267,3 +276,35 @@ class Vectors(Bunch):
 
     def __iter__(self):
         return self.iter_vectors()
+
+
+class FourVectorArray:
+    def __init__(self, pt, eta, phi, energy):
+        self.pt = pt
+        self.eta = eta
+        self.phi = phi
+        self.energy = energy
+
+    @property
+    def px(self):
+        import numpy as np
+
+        return self.pt * np.cos(self.phi)
+
+    @property
+    def py(self):
+        import numpy as np
+
+        return self.pt * np.sin(self.phi)
+
+    @property
+    def pz(self):
+        import numpy as np
+
+        return self.pt * np.sinh(self.eta)
+
+    @property
+    def rapidity(self):
+        import numpy as np
+
+        return 0.5 * np.log((self.energy + self.pz) / (self.energy - self.pz))
