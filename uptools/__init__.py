@@ -308,3 +308,13 @@ class FourVectorArray:
         import numpy as np
 
         return 0.5 * np.log((self.energy + self.pz) / (self.energy - self.pz))
+
+    @property
+    def mass2(self):
+        return self.energy ** 2 - (self.px ** 2 + self.py ** 2 + self.pz ** 2)
+
+    @property
+    def mass(self):
+        import numpy as np
+
+        return np.sqrt(self.mass2)
