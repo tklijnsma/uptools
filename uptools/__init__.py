@@ -71,7 +71,7 @@ def numentries_rootfile(rootfile, treepath=None):
 def format_rootfiles(rootfiles):
     try:
         if rootfiles.endswith(".root"):
-            if seutils.has_protocol(rootfiles) and "*" in rootfiles:
+            if seutils.path.has_protocol(rootfiles) and "*" in rootfiles:
                 rootfiles = seutils.ls_wildcard(rootfiles)
             else:
                 rootfiles = [rootfiles]
