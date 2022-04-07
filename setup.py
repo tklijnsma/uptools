@@ -13,7 +13,6 @@ setup(
     author_email="tklijnsm@gmail.com",
     packages=["uptools"],
     zip_safe=False,
-    install_requires=["seutils", "uproot-methods", "uproot3"],
     include_package_data=True,
     python_requires=">=3.5"
 )

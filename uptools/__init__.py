@@ -1,24 +1,4 @@
-from base64 import decode
 import logging
-
-import seutils
-
-try:
-    import awkward as ak
-except ImportError:
-    try:
-        import awkward0 as ak
-    except ImportError:
-        import awkward1 as ak
-
-try:
-    import uproot3 as uproot
-except ImportError:
-    import uproot
-
-UPROOT_VERSION = int(uproot.__version__.split('.',1)[0])
-
-
 def setup_logger():
     fmt = logging.Formatter(
         fmt="\033[33m[uptools|%(levelname)8s|%(asctime)s|%(module)s]:\033[0m %(message)s",
@@ -30,9 +10,33 @@ def setup_logger():
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
     return logger
-
-
 logger = setup_logger()
+
+
+try:
+    import awkward as ak
+except ImportError:
+    try:
+        import awkward0 as ak
+    except ImportError:
+        try:
+            import awkward1 as ak
+        except ImportError:
+            logger.error('Need some version of awkward-arrays installed!')
+            raise
+
+try:
+    import uproot3 as uproot
+except ImportError:
+    try:
+        import uproot
+    except ImportError:
+        logger.error('Need some version of uproot installed!')
+        raise
+
+
+UPROOT_VERSION = int(uproot.__version__.split('.',1)[0])
+AK_VERSION = int(ak.__version__.split('.',1)[0])
 
 
 def debug(flag=True):
@@ -88,8 +92,16 @@ def numentries_rootfile(rootfile, treepath=None):
 def format_rootfiles(rootfiles):
     try:
         if rootfiles.endswith(".root"):
-            if seutils.path.has_protocol(rootfiles) and "*" in rootfiles:
+            if ':' in rootfiles and "*" in rootfiles:
+                try:
+                    import seutils
+                except ImportError:
+                    logger.error('Need seutils installed for remote wildcards support: pip install seutils')
+                    raise
                 rootfiles = seutils.ls_wildcard(rootfiles)
+            elif '*' in rootfiles:
+                import glob
+                rootfiles = glob.glob(rootfiles)
             else:
                 rootfiles = [rootfiles]
     except AttributeError:
